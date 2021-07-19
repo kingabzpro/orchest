@@ -161,7 +161,12 @@ def create_app():
     @app.route("/<path:path>", methods=["GET"])
     def index(path):
         # in Debug mode proxy to CLIENT_DEV_SERVER_URL
-        if os.environ.get("FLASK_ENV") == "development":
+
+        # WIP.
+        is_ws = request.headers.get("Upgrade") == "websocket"
+        is_ws = is_ws or request.url.startswith("ws")
+        is_ws = is_ws or "websocket" in request.url
+        if os.environ.get("FLASK_ENV") == "development" and not is_ws:
             return _proxy(request, app.config["CLIENT_DEV_SERVER_URL"] + "/")
         else:
             file_path = os.path.join(app.config["STATIC_DIR"], path)
